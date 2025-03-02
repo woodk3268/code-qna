@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!--    <meta name="_csrf" th:content="${_csrf.token}"/>-->
+    <!--    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>-->
+
+    <title>Code Q&A</title>
+
+    <!-- Custom fonts for this template -->
+    <link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link
+            href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+            rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="/css/sb-admin-2.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this page -->
+    <link href="/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="/vendor/jquery/jquery.min.js"></script>
+    <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="/vendor/jquery-easing/jquery.easing.min.js"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="/js/sb-admin-2.min.js"></script>
+
+    <!-- Page level plugins -->
+    <script src="/vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+    <!-- Page level custom scripts -->
+    <script src="/js/demo/datatables-demo.js"></script>
+
+    <!-- 커스텀 CSS -->
+    <style>
+        /*본문 사이즈*/
+        #wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #content-wrapper {
+            flex: 1;
+        }
+
+        footer {
+            background-color: #8D94C7;
+            color: black;
+            height: 80px; /* 푸터 높이 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /*테이블 스타일*/
+        table {
+            border-collapse: collapse;
+            width: auto; /* Adjust width as needed */
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        .table-container {
+            height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+
+</head>
+
+<body id="page-top">
+
+<!-- Page Wrapper -->
+<div id="wrapper">
+
+    <!-- Content Wrapper -->
+    <div id="content-wrapper" class="d-flex flex-column">
+
+        <!-- Main Content -->
+        <div id="content">
+
+            <!-- 헤더 -->
+            <div th:insert="~{admin/fragments/adminHeader :: #header}"></div>
+
+            <!-- Begin Page Content -->
+            <div class="container-fluid">
+
+                <!-- 방문자 대시보드 -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h3 class="m-0 font-weight-bold text-primary">방문자 차트</h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="form-inline align-content-center">
+                            <!-- 버튼 -->
+                            <ul>
+                                <button class="btn btn-primary btn-icon-split" id="daily" style="padding: 5px"
+                                        onclick="updateChart('daily')">일간 조회
+                                </button>
+                                <button class="btn btn-primary btn-icon-split" id="weekly" style="padding: 5px"
+                                        onclick="updateChart('weekly')">주간 조회
+                                </button>
+                                <button class="btn btn-primary btn-icon-split" id="monthly" style="padding: 5px"
+                                        onclick="updateChart('monthly')">월간 조회
+                                </button>
+                            </ul>
+                        </div>
+                        <hr style="height: 3px; background-color: #007bff; margin-top: 0">
+                        <div>
+                            <h1 class="h3 mb-2 text-gray-800" id="chart-title">일간 조회</h1>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="mr-auto form-inline" style="justify-content: center;">
+                            <div style="display: flex; justify-content: center; align-items: center; padding: 5px">
+                                <div class="mb-4" style="flex: 1; height: 400px; width: 800px;">
+                                    <canvas id="myChart" style="display: block; box-sizing: border-box; height: 400px; width: 100%;" width="800" height="400"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 방문자 대시보드 end-->
+
+                <!-- 게시물 대시보드 -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h3 class="m-0 font-weight-bold text-primary">게시물 차트</h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="form-inline align-content-center">
+                            <!-- 버튼 -->
+                            <ul>
+                                <button class="btn btn-primary btn-icon-split" id="dailyBoard" style="padding: 5px"
+                                        onclick="updateBoardChart('daily')">일간 조회
+                                </button>
+                                <button class="btn btn-primary btn-icon-split" id="weeklyBoard" style="padding: 5px"
+                                        onclick="updateBoardChart('weekly')">주간 조회
+                                </button>
+                                <button class="btn btn-primary btn-icon-split" id="monthlyBoard" style="padding: 5px"
+                                        onclick="updateBoardChart('monthly')">월간 조회
+                                </button>
+                            </ul>
+                        </div>
+                        <hr style="height: 3px; background-color: #007bff; margin-top: 0">
+                        <div>
+                            <h1 class="h3 mb-2 text-gray-800" id="chart-title-board">일간 조회</h1>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="mr-auto form-inline" style="justify-content: center;">
+                            <div style="display: flex; justify-content: center; align-items: center; padding: 5px">
+                                <div class="mb-4" style="flex: 1; height: 400px; width: 800px;">
+                                    <canvas id="myBoardChart" style="display: block; box-sizing: border-box; height: 400px; width: 100%;" width="800" height="400"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 게시물 대시보드 end-->
+
+            </div>
+            <!-- /.container-fluid -->
+
+        </div>
+        <!-- End of Main Content -->
+
+    </div>
+    <!-- End of Content Wrapper -->
+    <!-- 푸터 -->
+    <div th:insert="~{fragments/footer :: #footer}"></div>
+
+</div>
+<!-- End of Page Wrapper -->
+
+<!-- 방문자 차트-->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    function getPastDates(days) {
+        const dates = [];
+        for (let i = days - 1; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            dates.push(date.toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' }));
+        }
+        return dates;
+    }
+
+    function getPastWeeks(weeks) {
+        const dates = [];
+        for (let i = weeks - 1; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - (i * 7));
+            dates.push(`${i}주 전`);
+        }
+        return dates;
+    }
+
+    function getPastMonths(months) {
+        const dates = [];
+        for (let i = months - 1; i >= 0; i--) {
+            const date = new Date();
+            date.setMonth(date.getMonth() - i);
+            dates.push(date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'numeric' }));
+        }
+        return dates;
+    }
+
+    const dailyLabels = getPastDates(7);
+    const weeklyLabels = getPastWeeks(4);
+    const monthlyLabels = getPastMonths(12);
+
+    const ctx = document.getElementById('myChart').getContext('2d');
+    let myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: dailyLabels,
+            datasets: [{
+                label: '방문자 수',
+                data: [],
+                backgroundColor: 'rgba(0, 123, 255, 0.2)',
+                borderColor: 'rgba(0, 123, 255, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    function updateChart(period) {
+        let url, title, newLabels;
+        switch (period) {
+            case 'daily':
+                url = '/data/daily';
+                newLabels = getPastDates(7);
+                title = '일간 조회';
+                break;
+            case 'weekly':
+                url = '/data/weekly';
+                newLabels = getPastWeeks(4);
+                title = '주간 조회';
+                break;
+            case 'monthly':
+                url = '/data/monthly';
+                newLabels = getPastMonths(12);
+                title = '월간 조회';
+                break;
+        }
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                myChart.data.datasets[0].data = data;
+                myChart.data.labels = newLabels;
+                document.getElementById('chart-title').innerText = title;
+                myChart.update();
+            });
+    }
+<!-- 방문자 차트 end-->
+
+<!--게시물 그래프-->
+    const ctx2 = document.getElementById('myBoardChart').getContext('2d');
+    let myBoardChart = new Chart(ctx2, {
+        type: 'line',
+        data: {
+            labels: dailyLabels,
+            datasets: [{
+                label: '게시물 수',
+                data: [],
+                backgroundColor: 'rgba(255, 0, 0, 0.2)',
+                borderColor: 'rgba(255,0,0,1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    function updateBoardChart(period) {
+        let url, title, newLabels;
+        switch (period) {
+            case 'daily':
+                url = '/data/dailyBoard';
+                newLabels = getPastDates(7);
+                title = '일간 조회';
+                break;
+            case 'weekly':
+                url = '/data/weeklyBoard';
+                newLabels = getPastWeeks(4);
+                title = '주간 조회';
+                break;
+            case 'monthly':
+                url = '/data/monthlyBoard';
+                newLabels = getPastMonths(12);
+                title = '월간 조회';
+                break;
+        }
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                myBoardChart.data.datasets[0].data = data;
+                myBoardChart.data.labels = newLabels;
+                document.getElementById('chart-title-board').innerText = title;
+                myBoardChart.update();
+            });
+    }
+
+    window.onload = function() {
+        updateChart('daily');
+        updateBoardChart('daily');
+    };
+</script>
+
+
+</body>
+</html>

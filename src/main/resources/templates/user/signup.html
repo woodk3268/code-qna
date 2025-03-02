@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Code QnA</title>
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <link href="/css/sb-admin-2.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <!-------------------------------------------------------------------------------->
+
+    <style>
+        .fieldError {
+            color: #bd2130;
+            width: 400px;
+        }
+        .p-22222{
+            padding:3rem!important;
+            margin-left: 70px;
+        }
+        .container{
+            max-width: 1400px;
+        }
+    </style>
+
+</head>
+
+<body class="bg-gradient-primary">
+
+<div class="container">
+
+    <div class="card o-hidden border-0 shadow-lg my-5">
+        <div class="card-body p-0">
+            <!-- Nested Row within Card Body -->
+            <div class="row">
+                <div class="col-lg-7 d-none d-lg-block">
+                    <img src="/img/bbangbbang.jpg" style="width: 100%; height: 100%; object-fit: fill;">
+                </div>
+                <div class="col-lg-5">
+                    <div class="p-22222">
+                        <div class="text-center">
+                            <h1 class="h4 text-gray-900 mb-4">Create an Account!</h1>
+                        </div>
+                        <form class="user" action="/users/signup" role="form" method="post">
+                            <div class="form-group row">
+                                <div class="col-sm-6 mb-3 mb-sm-0">
+                                    <input id="nickname" type="text" class="form-control form-control-user" placeholder="Nickname" name="nickname" value="">
+                                    <p id="nicknameError" style="display:none; color:red;">이미 사용 중인 닉네임입니다.</p>
+                                    <p id="nicknameSuccess" style="display:none; color:green;">사용 가능한 닉네임입니다.</p>
+                                    <p id="nicknameFormatError" style="display:none; color:red;">2~10자 영어, 숫자만 가능합니다.</p>
+                                    <p id="nicknameEmptyError" style="display:none; color:red;">닉네임을 입력해주세요.</p>
+                                </div>
+                                <div class="col-sm-6" style="height: 50px">
+                                    <button type="button" class="btn btn-user btn-primary" onclick="checkNicknameExist()">중복 확인</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <input type="email" class="form-control form-control-user" placeholder="Email Address" id="email" name="email" value="">
+                                <p id="emailError" style="display:none; color:red;">이메일을 입력해주세요.</p>
+                                <p id="emailFormatError" style="display:none; color:red;">이메일 형식이 아닙니다.</p>
+                            </div>
+                            <div class="form-group">
+                                <input type="password" class="form-control form-control-user" placeholder="Password" id="password" name="password" value="">
+                                <p id="passwordError" style="display:none; color:red;">비밀번호를 입력해주세요.</p>
+                                <p id="passwordLengthError" style="display:none; color:red;">비밀번호는 8~16자리여야 합니다.</p>
+                            </div>
+                            <div class="form-group">
+                                <input type="password" class="form-control form-control-user" id="passwordRepeat" placeholder="Password Repeat" onkeyup="checkPasswordMatch();">
+                                <p id="passwordMatchError" style="display:none; color:red;">비밀번호가 일치하지 않습니다.</p>
+                            </div>
+                            <button id="signup" type="submit" class="btn btn-primary btn-user btn-block" onclick="checkPasswordMatchOnSubmit(event)">
+                                회원가입
+                            </button>
+                            <br>
+                            <hr>
+                            <a href="/users/login" class="btn btn-user btn-danger btn-block">
+                                취소
+                            </a>
+                            <!--CSRF-->
+                            <!--                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">-->
+                            <input type="hidden" id="errorMessage" value="">
+                            <!-- 유효성 검사 에러 메세지 표시 구역-->
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        let errorMessage = $('#errorMessage').val();
+        if (errorMessage) {
+            alert(errorMessage);
+        }
+    });
+</script>
+
+<script>
+    function checkNicknameExist() {
+        const nickname = document.getElementById('nickname').value;
+        const nicknameError = document.getElementById('nicknameError');
+        const nicknameSuccess = document.getElementById('nicknameSuccess');
+        const nicknameFormatError = document.getElementById('nicknameFormatError');
+        const nicknameEmptyError = document.getElementById('nicknameEmptyError');
+
+        // 닉네임이 빈 칸인지 확인
+        if (!nickname) {
+            nicknameEmptyError.style.display = 'block';
+            nicknameFormatError.style.display = 'none';
+            nicknameError.style.display = 'none';
+            nicknameSuccess.style.display = 'none';
+            return;
+        } else {
+            nicknameEmptyError.style.display = 'none';
+        }
+
+        // 한글이 포함되어 있는지 검사하는 정규 표현식
+        const koreanRegex = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/;
+        const validNicknameRegex = /^[a-zA-Z0-9]{2,10}$/;
+
+        if (koreanRegex.test(nickname) || !validNicknameRegex.test(nickname)) {
+            nicknameFormatError.style.display = 'block';
+            nicknameError.style.display = 'none';
+            nicknameSuccess.style.display = 'none';
+            nicknameEmptyError.style.display = 'none';
+            return;
+        }
+
+        nicknameFormatError.style.display = 'none';
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', `/users/${nickname}/exist`, true);
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                const response = JSON.parse(xhr.responseText);
+                if (response.exists) {
+                    nicknameError.style.display = 'block';
+                    nicknameSuccess.style.display = 'none';
+                } else {
+                    nicknameError.style.display = 'none';
+                    nicknameSuccess.style.display = 'block';
+                }
+            }
+        };
+        xhr.send();
+    }
+
+    function checkPasswordMatch() {
+        var password = document.getElementById("password").value;
+        var confirmPassword = document.getElementById("passwordRepeat").value;
+        var errorElement = document.getElementById("passwordMatchError");
+
+        if (password !== confirmPassword) {
+            errorElement.style.display = "block";
+        } else {
+            errorElement.style.display = "none";
+        }
+    }
+
+    function checkPasswordMatchOnSubmit(event) {
+        event.preventDefault(); // 기본 폼 제출 동작을 막음
+
+        var password = document.getElementById("password").value;
+        var confirmPassword = document.getElementById("passwordRepeat").value;
+        var email = document.getElementById("email").value;
+        var nickname = document.getElementById("nickname").value;
+
+        var passwordError = document.getElementById("passwordError");
+        var passwordMatchError = document.getElementById("passwordMatchError");
+        var passwordLengthError = document.getElementById("passwordLengthError");
+        var emailError = document.getElementById("emailError");
+        var emailFormatError = document.getElementById("emailFormatError");
+        var nicknameEmptyError = document.getElementById("nicknameEmptyError");
+
+        var isValid = true;
+
+        // 닉네임 검사
+        checkNicknameExist();
+
+        // 이메일 유효성 검사 정규 표현식
+        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        // 이메일이 공백인지 확인
+        if (!email) {
+            emailError.style.display = "block";
+            emailFormatError.style.display = "none";
+            isValid = false;
+        } else if (!emailRegex.test(email)) {
+            emailError.style.display = "none";
+            emailFormatError.style.display = "block";
+            isValid = false;
+        } else {
+            emailError.style.display = "none";
+            emailFormatError.style.display = "none";
+        }
+
+        // 비밀번호 입력 여부 확인
+        if (!password) {
+            passwordError.style.display = "block";
+            isValid = false;
+        } else {
+            passwordError.style.display = "none";
+
+            if (password.length < 8 || password.length > 16) {
+                passwordLengthError.style.display = "block";
+                isValid = false;
+            } else {
+                passwordLengthError.style.display = "none";
+            }
+        }
+
+        // 비밀번호 일치 여부 확인
+        if (password !== confirmPassword) {
+            passwordMatchError.style.display = "block";
+            isValid = false;
+        } else {
+            passwordMatchError.style.display = "none";
+        }
+
+        if (isValid) {
+            // 기본 폼 제출 동작 활성화
+            var form = document.querySelector('.user');
+            form.submit();
+            alert('회원가입이 완료되었습니다');
+        }
+    }
+
+</script>
+
+</body></html>

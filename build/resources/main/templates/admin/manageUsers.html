@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!--    <meta name="_csrf" th:content="${_csrf.token}"/>-->
+    <!--    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>-->
+
+    <title>Code Q&A</title>
+
+    <!-- Custom fonts for this template -->
+    <link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link
+            href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+            rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="/css/sb-admin-2.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this page -->
+    <link href="/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="/vendor/jquery/jquery.min.js"></script>
+    <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="/vendor/jquery-easing/jquery.easing.min.js"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="/js/sb-admin-2.min.js"></script>
+
+    <!-- Page level plugins -->
+    <script src="/vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+    <!-- Page level custom scripts -->
+    <script src="/js/demo/datatables-demo.js"></script>
+
+    <!-- 커스텀 CSS -->
+    <style>
+        /*본문 사이즈*/
+        #wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #content-wrapper {
+            flex: 1;
+        }
+
+        footer {
+            background-color: #8D94C7;
+            color: black;
+            height: 80px; /* 푸터 높이 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+
+</head>
+
+<body id="page-top">
+
+<!-- Page Wrapper -->
+<div id="wrapper">
+
+    <!-- Content Wrapper -->
+    <div id="content-wrapper" class="d-flex flex-column">
+
+        <!-- Main Content -->
+        <div id="content">
+
+            <!-- 헤더 -->
+            <div th:insert="~{admin/fragments/adminHeader :: #header}"></div>
+
+            <!-- Begin Page Content -->
+            <div class="container-fluid">
+
+                <!-- DataTales Example -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">회원 관리</h6>
+                    </div>
+
+                    <!--검색 및 버튼-->
+                    <div class="card-body">
+                        <div class="form-inline">
+                            <ul class="mr-auto form-inline">
+                                <!--검색-->
+                                <select class="form-control" style="width: auto;" id="searchCondition">
+                                    <option value="nickname">닉네임</option>
+                                    <option value="email">이메일</option>
+                                    <option value="kakao">카카오계정 여부</option>
+                                    <option value="regdate">가입일</option>
+                                    <option value="expiredDate">탈퇴일</option>
+                                </select>
+                                <!-- 검색어 입력란 -->
+                                <input type="text" class="form-control" placeholder="검색어를 입력해주세요." id="searchKeyword">
+
+                                <!-- 시작 날짜 선택 -->
+                                <input type="date" class="form-control d-none" id="startTime">
+
+                                <!-- 끝 날짜 선택 -->
+                                <input type="date" class="form-control d-none" id="endTime">
+
+                                <!---->
+                                <div id="kakaoCheckBox" class="form-check form-check-inline ml-2">
+                                    <label class="form-check-label p-2" style="margin-left: 10px" for="kakaoCheckboxY">Y</label>
+                                    <input class="form-check-input" type="radio" name="kakaoCheckbox" id="kakaoCheckboxY" value="Y">
+                                    <label class="form-check-label p-2" style="margin-left: 10px" for="kakaoCheckboxN">N</label>
+                                    <input class="form-check-input" type="radio" name="kakaoCheckbox" id="kakaoCheckboxN" value="N">
+                                </div>
+
+
+                                <!-- 검색 버튼 -->
+                                <button id="searchButton" type="submit" class="btn btn-primary">검색</button>
+
+                            </ul>
+                            <!--버튼 -->
+                            <!--<form method="post">-->
+                            <ul>
+                                <button class="btn btn-warning btn-icon-split" id="restoreBtn" style="padding: 5px" onclick="restoreCheckedUsers()">회원 계정 복구</button>
+                                <button class="btn btn-danger btn-icon-split" id="deleteBtn" style="padding: 5px" onclick="deleteCheckedUsers()">회원 탈퇴</button>
+                            </ul>
+                            <!--</form>-->
+
+                        </div>
+
+                        <div class="table-responsive">
+                            <table data-order='[[1, "desc"]]' class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                <thead>
+                                <tr>
+                                    <th>checkbox</th>
+                                    <th>닉네임</th>
+                                    <th>이메일</th>
+                                    <th>카카오계정 여부</th>
+                                    <th>회원 등급</th>
+                                    <th>가입일</th>
+                                    <th>탈퇴일</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <!-- Thymeleaf 반복문을 이용하여 데이터 출력 -->
+                                <tr th:each="user : ${users}">
+                                    <td><input class="userCheckbox" type="checkbox"/></td>
+                                    <td th:text="${user.nickname}"></td>
+                                    <td th:text="${user.email}"></td>
+                                    <td th:text="${user.kakao}"></td>
+                                    <td th:text="${user.user_role}"></td>
+                                    <td th:text="${#temporals.format(user.regdate, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                                    <td th:text="${#temporals.format(user.expiredDate, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                                    <!--유저 컨디션 가져옴-->
+                                    <input type="hidden" class="userCondition" th:value="${user.user_condition}"/>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <!-- /.container-fluid -->
+
+        </div>
+        <!-- End of Main Content -->
+
+    </div>
+    <!-- End of Content Wrapper -->
+    <!-- 푸터 -->
+    <div th:insert="~{fragments/footer :: #footer}"></div>
+
+</div>
+<!-- End of Page Wrapper -->
+
+<!-- 검색조건에 따라 입력창 띄우는 스크립트 -->
+<script>
+    // 페이지 로드 시 실행
+    $(document).ready(function() {
+        // 검색 조건이 바뀔 때마다 이벤트 리스너 등록
+        $('#searchCondition').change(function() {
+            handleSearchConditionChange();
+        });
+
+        // 초기 실행
+        handleSearchConditionChange();
+    });
+
+    // 검색 조건에 따라 검색어 입력창과 날짜 선택창을 토글하는 함수
+    function handleSearchConditionChange() {
+        var searchCondition = $('#searchCondition').val();
+        if (searchCondition === "regdate" || searchCondition === "expiredDate") {
+            // 날짜 선택창 표시
+            $('#startTime').removeClass('d-none');
+            $('#endTime').removeClass('d-none');
+            // 검색어 입력창 숨김
+            $('#searchKeyword').addClass('d-none');
+            $('#searchButton').removeClass('d-none');
+            // 카카오 여부 선택 숨김
+            $('#kakaoCheckBox').addClass('d-none');
+        }else if (searchCondition === "kakao") {
+            // 카카오 여부 선택 표시
+            $('#kakaoCheckBox').removeClass('d-none');
+            // 검색어 입력창 숨김
+            $('#searchKeyword').addClass('d-none');
+            // 날짜 선택창 숨김
+            $('#startTime').addClass('d-none');
+            $('#endTime').addClass('d-none');
+            // 검색 버튼 표시
+            $('#searchButton').addClass('d-none');
+        } else {
+            // 검색어 입력창 표시
+            $('#searchKeyword').removeClass('d-none');
+            // 날짜 선택창 숨김
+            $('#startTime').addClass('d-none');
+            $('#endTime').addClass('d-none');
+            // 삭제 여부 선택 숨김
+            $('#kakaoCheckBox').addClass('d-none');
+            // 검색 버튼 표시
+            $('#searchButton').removeClass('d-none');
+
+        }
+    }
+</script>
+
+<!-- 검색에 따라 테이블을 띄워주는 스크립트 -->
+<script>
+    $(document).ready(function() {
+        // 라디오 버튼 클릭 이벤트 핸들러를 등록합니다.
+        $('input[name="kakaoCheckbox"]').change(function() {
+            triggerSearch();
+        });
+
+        // 검색 버튼 클릭 이벤트 핸들러를 등록합니다.
+        $('#searchButton').click(function() {
+            triggerSearch();
+        });
+
+        function triggerSearch() {
+            var searchCondition = $('#searchCondition').val();
+            var searchKeyword = $('#searchKeyword').val();
+            var starttime = $('#startTime').val();
+            var endtime = $('#endTime').val();
+            var kakaoCondition = $('input[name="kakaoCheckbox"]:checked').val();
+
+            if(searchCondition === "regdate" || searchCondition === "expiredDate"){
+                // 검색어가 비어있는지 확인
+                if (!starttime) {
+                    alert("시작날짜를 선택해주세요");
+                    return;
+                }
+            }else if(searchCondition === "kakao"){
+                console.log(kakaoCondition);
+            } else{
+                // 검색어가 비어있는지 확인
+                if (!searchKeyword) {
+                    alert("검색어를 입력하세요");
+                    return;
+                }
+            }
+
+            // filterTable 함수 호출
+            filterTable(searchCondition, searchKeyword, starttime, endtime, kakaoCondition);
+
+        }
+    });
+
+    function filterTable(searchCondition, searchKeyword, starttime, endtime, kakaoCondition) {
+        // AJAX를 사용하여 서버에 검색 요청을 보냅니다.
+        $.ajax({
+            url: '/boardAPI/searchUsers', // 검색을 처리하는 서버 엔드포인트 URL
+            type: 'GET',
+            data: { condition: searchCondition, keyword: searchKeyword, start: starttime, end: endtime, kakaoCondition: kakaoCondition },
+            success: function (data) {
+                // 검색 결과를 받아옵니다.
+                var searchData = data;
+
+                console.log(data);
+
+                // 기존 테이블을 삭제합니다.
+                $('.table-responsive').empty();
+
+                // 새로운 테이블을 만듭니다.
+                var newTable = $('<table data-order=\'\[\[1, "desc"\]\]\' class="table table-bordered">').attr('id', 'dataTable').attr('width', '100%').attr('cellspacing', '0');
+                var thead = $('<thead>').appendTo(newTable);
+                var tbody = $('<tbody>').appendTo(newTable);
+
+                // 테이블 헤더 생성
+                var headerRow = $('<tr>').appendTo(thead);
+                $('<th>').text('checkbox').appendTo(headerRow);
+                $('<th>').text('닉네임').appendTo(headerRow);
+                $('<th>').text('이메일').appendTo(headerRow);
+                $('<th>').text('카카오계정 여부').appendTo(headerRow);
+                $('<th>').text('회원 등급').appendTo(headerRow);
+                $('<th>').text('가입일').appendTo(headerRow);
+                $('<th>').text('탈퇴일').appendTo(headerRow);
+
+
+                // 데이터 출력
+                searchData.forEach(function (user) {
+                    var newRow = $('<tr>').appendTo(tbody);
+                    $('<td><input class="userCheckbox" type="checkbox"/>').appendTo(newRow);
+                    $('<td>').text(user.nickname).appendTo(newRow);
+                    $('<td>').text(user.email).appendTo(newRow);
+                    $('<td>').text(user.kakao).appendTo(newRow);
+                    $('<td>').text(user.user_role).appendTo(newRow);
+                    $('<td>').text(formatDate(new Date(user.regdate))).appendTo(newRow);
+                    if(user.expiredDate ==null){
+                        $('<td>').text("").appendTo(newRow);
+                    }else{
+                        $('<td>').text(formatDate(new Date(user.expiredDate))).appendTo(newRow);
+                    }
+                    //userCondition가져옴
+                    $('<input type="hidden" class="userCondition" value="' + user.user_condition + '">').appendTo(newRow);
+
+                });
+
+                tableResponsive = $('<div>').appendTo($('.table-responsive'));
+
+                // 테이블 생성한 것을 tableResponsive 안에 넣어준다
+                tableResponsive.append(newTable);
+
+                // 새로 생성된 테이블에 DataTables 초기화
+                newTable.DataTable({
+                    "dom": "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                        "<'row'<'col-sm-12'tr>>" +
+                        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                    "renderer": 'bootstrap',
+                    "language": {
+                        "paginate": {
+                            "previous": "previous",
+                            "next": "next"
+                        }
+                    }
+                });
+            },
+            error: function (xhr, status, error) {
+                // 에러 처리
+                console.error(xhr);
+            }
+        });
+    }
+
+    // 날짜 포맷팅 함수
+    function formatDate(date) {
+        if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+            return ''; // date가 null이거나 유효한 날짜가 아니면 빈 문자열 반환
+        }
+
+        var year = date.getFullYear();
+        var month = ('0' + (date.getMonth() + 1)).slice(-2); // 월은 0부터 시작하므로 +1
+        var day = ('0' + date.getDate()).slice(-2);
+        var hours = ('0' + date.getHours()).slice(-2);
+        var minutes = ('0' + date.getMinutes()).slice(-2);
+        var seconds = ('0' + date.getSeconds()).slice(-2);
+
+        return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
+    }
+</script>
+<script>
+
+    //체크 회원 삭제
+    function deleteCheckedUsers(){
+        // var token = $("meta[name='_csrf']").attr("content");
+        // var header = $("meta[name='_csrf_header']").attr("content");
+        const checkboxes = document.querySelectorAll('.userCheckbox:checked');
+
+
+        if (checkboxes.length === 0) {
+            alert("삭제할 회원을 선택해주세요.");
+            return;
+        }
+        let checked = true;
+        var email_arr = [];
+        var url = "/users/deleteUsers";
+
+        console.log(checkboxes);
+
+        checkboxes.forEach(checkbox => {
+            const userCondition = checkbox.closest('tr').querySelector('.userCondition').value;
+            if (userCondition !== "N"){
+                alert("선택한 회원중 이미 탈퇴된 회원이 있습니다.");
+                checked = false;
+            }
+        });
+
+        if (checked){
+            checkboxes.forEach(checkbox => {
+                const checkedEmail = checkbox.closest('tr').querySelector('td:nth-child(3)').innerText;
+                email_arr.push(checkedEmail);
+
+                console.log(email_arr);
+
+                $.ajax({
+                    url: url,
+                    type: "POST",
+                    data: JSON.stringify(email_arr),
+                    contentType: "application/json; charset-utf-8",
+                    // beforeSend : function (xhr){
+                    //     xhr.setRequestHeader(header, token);
+                    // },
+                    cache : false,
+                    success : function (){
+                        console.log("탈퇴 처리 되었습니다.");
+                    },
+                    error : function (request, error){
+                        if (request.status == '401'){
+                            alert("권한이 없습니다.");
+                            location.href='/users/login';
+                        }else {
+                            alert("탈퇴처리 오류");
+                            alert("code: " + request.status + "\n message : " + request.responseText + "\n error : " + error);
+                        }
+                    }
+                });
+            })
+            alert("탈퇴 처리 되었습니다.");
+            window.location.reload();
+        }
+    }
+
+    //체크 회원 복구
+    function restoreCheckedUsers(){
+        // var token = $("meta[name='_csrf']").attr("content");
+        // var header = $("meta[name='_csrf_header']").attr("content");
+        const checkboxes = document.querySelectorAll('.userCheckbox:checked');
+
+        if (checkboxes.length === 0) {
+            alert("복구할 회원을 선택해주세요.");
+            return;
+        }
+
+        let checked = true;
+        var email_arr = [];
+        var url = "/users/restoreUsers";
+
+        console.log(checkboxes);
+
+        checkboxes.forEach(checkbox => {
+            const userCondition = checkbox.closest('tr').querySelector('.userCondition').value;
+            console.log("restore: " + userCondition);
+            if (userCondition !== "Y"){
+                alert("선택한 회원중 활동중인 회원이 있습니다.");
+                checked = false;
+            }
+        });
+
+        if (checked){
+            checkboxes.forEach(checkbox => {
+                const checkedEmail = checkbox.closest('tr').querySelector('td:nth-child(3)').innerText;
+                email_arr.push(checkedEmail);
+
+                console.log(email_arr);
+
+                $.ajax({
+                    url: url,
+                    type: "POST",
+                    data: JSON.stringify(email_arr),
+                    contentType: "application/json; charset-utf-8",
+                    // beforeSend : function (xhr){
+                    //     xhr.setRequestHeader(header, token);
+                    // },
+                    cache : false,
+                    success : function (){
+                        console.log("복구 처리 되었습니다.");
+                    },
+                    error : function (request, error){
+                        if (request.status == '401'){
+                            alert("권한이 없습니다.");
+                            location.href='/users/login';
+                        }else {
+                            alert("복구처리 오류");
+                            alert("code: " + request.status + "\n message : " + request.responseText + "\n error : " + error);
+                        }
+                    }
+                });
+            })
+            alert("복구 처리 되었습니다.");
+            window.location.reload();
+        }
+    }
+</script>
+
+</body>
+
+</html>

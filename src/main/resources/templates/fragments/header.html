@@ -1,0 +1,88 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+    <!-- Custom fonts for this template -->
+    <link href="/static/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link
+            href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+            rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="/static/css/sb-admin-2.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this page -->
+    <link href="/static/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="/static/vendor/jquery/jquery.min.js"></script>
+    <script src="/static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="/static/vendor/jquery-easing/jquery.easing.min.js"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="/static/js/sb-admin-2.min.js"></script>
+
+</head>
+
+<div id="header">
+    <nav class="navbar navbar-expand-lg bg-gradient-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" sec:authorize="isAnonymous()" href="/main" style="color: white">
+                <img src="/img/QnA.png" style="height: 50px; width: 50px;"/>
+            </a>
+            <a class="navbar-brand" sec:authorize="hasAnyAuthority('ROLE_USER')" href="/main" style="color: white">
+                <img src="/img/QnA.png" style="height: 50px; width: 50px;"/>
+            </a>
+            <a class="navbar-brand" sec:authorize="hasAnyAuthority('ROLE_ADMIN')" href="/main" style="color: white">
+                <img src="/img/QnA.png" style="height: 50px; width: 50px;"/>
+            </a>
+            <input type="hidden" id="nickname" th:value="${nickname}">
+            <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                <ul class="navbar-nav mr-auto">
+
+                    <!-- 유저 환영 메세지 -->
+                    <li class="nav-item" sec:authorize="hasAnyAuthority('ROLE_USER')">
+                        <a class="nav-link" aria-haspopup="true" aria-expanded="false">
+                            <span class="mr-2 d-none d-lg-inline" style="color:black;">
+                                환영합니다. <span th:text="${nickname}"/> 님
+                            </span>
+                        </a>
+                    </li>
+
+                    <!-- 관리자 로그인 시 -->
+                    <li class="nav-item" sec:authorize="hasAnyAuthority('ROLE_ADMIN')">
+                        <a class="btn btn-danger" href="/admin/deleted" role="button" style="margin-top: 5px">
+                            <span class="mr-2 d-none d-lg-inline small" style="color: black">관리자 페이지로 이동</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <ul class="navbar-nav">
+
+                    <!--마이페이지-->
+                    <li class="nav-item" sec:authorize="hasAnyAuthority('ROLE_USER')">
+                        <a class="nav-link" href="/users/mypage" style="color: white">MyPage</a>
+                    </li>
+                    <!--로그인/로그아웃-->
+                    <li class="nav-item" style="text-align: right;" sec:authorize="isAnonymous()">
+                        <a class="nav-link" href="/users/login" style="color: white;">Login</a>
+                    </li>
+                    <li class="nav-item" style="text-align: right;" sec:authorize="isAuthenticated()">
+                        <a class="nav-link" href="/users/logout" style="color: white;">Logout</a>
+                    </li>
+                    <!--회원가입-->
+                    <li class="nav-item" style="text-align: right;" sec:authorize="isAnonymous()">
+                        <a class="nav-link" href="/users/signup" style="color: white;">Signup</a>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </nav>
+</div>
+
+

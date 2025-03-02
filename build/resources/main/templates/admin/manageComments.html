@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Code Q&A</title>
+
+    <!-- Custom fonts for this template -->
+    <link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link
+            href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+            rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="/css/sb-admin-2.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this page -->
+    <link href="/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="/vendor/jquery/jquery.min.js"></script>
+    <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="/vendor/jquery-easing/jquery.easing.min.js"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="/js/sb-admin-2.min.js"></script>
+
+    <!-- Page level plugins -->
+    <script src="/vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+    <!-- Page level custom scripts -->
+    <script src="/js/demo/datatables-demo.js"></script>
+
+    <style>
+        footer {
+            background-color: #8D94C7;
+            color: black;
+            height: 80px; /* 푸터 높이 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+
+
+</head>
+
+<body id="page-top">
+
+<!-- Page Wrapper -->
+<div id="wrapper">
+
+    <!-- Content Wrapper -->
+    <div id="content-wrapper" class="d-flex flex-column">
+
+        <!-- Main Content -->
+        <div id="content">
+
+            <!-- 헤더 -->
+            <div th:include="~{admin/fragments/adminHeader :: #header}"></div>
+
+
+            <!-- Begin Page Content -->
+            <div class="container-fluid">
+
+                <!-- DataTales Example -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">댓글 관리</h6>
+                    </div>
+
+                    <!--검색 및 버튼-->
+                    <div class="card-body">
+                        <div class="form-inline">
+                            <ul class="mr-auto">
+                                <!--검색-->
+                                <select class="form-control" style="width: auto;" id="searchCondition">
+                                    <option value="nickname">작성자</option>
+                                    <option value="content">댓글 내용</option>
+                                    <option value="regdate">생성일시</option>
+                                    <option value="deletetime">삭제일시</option>
+                                    <option value="recovertime">복원일시</option>
+                                    <option value="replycondition">삭제여부</option>
+
+                                </select>
+                                <!-- 검색어 입력란 -->
+                                <input type="text" class="form-control" placeholder="검색어를 입력해주세요." id="searchKeyword">
+
+                                <!-- 시작 날짜 선택 -->
+                                <input type="date" class="form-control d-none" id="startTime">
+
+                                <!-- 끝 날짜 선택 -->
+                                <input type="date" class="form-control d-none" id="endTime">
+
+                                <!-- 삭제여부 선택 -->
+                                <div id="deleteCheckBox" class="form-check form-check-inline ml-2">
+                                    <label class="form-check-label p-2" style="margin-left: 10px" for="deleteCheckboxY">Y</label>
+                                    <input class="form-check-input" type="radio" name="deleteCheckbox" id="deleteCheckboxY" value="Y">
+                                    <label class="form-check-label p-2" style="margin-left: 10px" for="deleteCheckboxN">N</label>
+                                    <input class="form-check-input" type="radio" name="deleteCheckbox" id="deleteCheckboxN" value="N">
+                                </div>
+
+                                <!-- 검색 버튼 -->
+                                <button id="searchButton" type="submit" class="btn btn-primary">검색</button>
+
+                            </ul>
+
+                            <ul>
+                                <!--버튼-->
+                                <button class="btn btn-warning btn-icon-split" style="padding: 5px" onclick="restoreCheckedReplies()">댓글 복원</button>
+                                <button class="btn btn-danger btn-icon-split" style="padding: 5px" onclick="deleteCheckedReplies()">댓글 삭제</button>
+                            </ul>
+
+
+                        </div>
+
+                        <div class="table-responsive">
+                            <table data-order='[[1, "desc"]]' class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                <thead>
+                                <tr>
+                                    <th>checkbox</th>
+                                    <th>번호</th>
+                                    <th>작성자</th>
+                                    <th>내용</th>
+                                    <th>작성일</th>
+                                    <th>삭제여부</th>
+                                    <th>삭제일시</th>
+                                    <th>복원일시</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <!-- Thymeleaf 반복문을 이용하여 데이터 출력 -->
+                                <tr th:each="reply : ${replies}">
+                                    <td><input class="replyCheckbox" type="checkbox"/></td>
+                                    <td th:text="${reply.id}"></td>
+                                    <td th:text="${reply.nickname}"></td>
+                                    <td th:text="${reply.content}"></td>
+                                    <td th:text="${#temporals.format(reply.regdate, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                                    <td th:text="${reply.reply_condition}"></td>
+                                    <td th:text="${#temporals.format(reply.delete_time, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                                    <td th:text="${#temporals.format(reply.recover_time, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <!-- /.container-fluid -->
+
+        </div>
+        <!-- End of Main Content -->
+
+        <!-- 푸터 -->
+        <div th:include="~{fragments/footer :: #footer}"></div>
+
+    </div>
+    <!-- End of Content Wrapper -->
+
+</div>
+<!-- End of Page Wrapper -->
+
+<!-- Scroll to Top Button-->
+<a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+</a>
+
+<!-- 검색조건에 따라 입력창 띄우는 스크립트 -->
+<script>
+    // 페이지 로드 시 실행
+    $(document).ready(function() {
+        // 검색 조건이 바뀔 때마다 이벤트 리스너 등록
+        $('#searchCondition').change(function() {
+            handleSearchConditionChange();
+        });
+
+        // 초기 실행
+        handleSearchConditionChange();
+    });
+
+    // 검색 조건에 따라 검색어 입력창과 날짜 선택창을 토글하는 함수
+    function handleSearchConditionChange() {
+        var searchCondition = $('#searchCondition').val();
+        if (searchCondition === "regdate" || searchCondition === "deletetime" || searchCondition === "recovertime") {
+            // 날짜 선택창 표시
+            $('#startTime').removeClass('d-none');
+            $('#endTime').removeClass('d-none');
+            // 검색어 입력창 숨김
+            $('#searchKeyword').addClass('d-none');
+            $('#searchButton').removeClass('d-none');
+            // 삭제 여부 선택 숨김
+            $('#deleteCheckBox').addClass('d-none');
+        }else if (searchCondition === "replycondition") {
+            // 삭제 여부 선택 표시
+            $('#deleteCheckBox').removeClass('d-none');
+            // 검색어 입력창 숨김
+            $('#searchKeyword').addClass('d-none');
+            // 날짜 선택창 숨김
+            $('#startTime').addClass('d-none');
+            $('#endTime').addClass('d-none');
+            // 검색 버튼 표시
+            $('#searchButton').addClass('d-none');
+        }
+        else {
+            // 검색어 입력창 표시
+            $('#searchKeyword').removeClass('d-none');
+            // 날짜 선택창 숨김
+            $('#startTime').addClass('d-none');
+            $('#endTime').addClass('d-none');
+            // 삭제 여부 선택 숨김
+            $('#deleteCheckBox').addClass('d-none');
+            // 검색 버튼 표시
+            $('#searchButton').removeClass('d-none');
+        }
+    }
+</script>
+
+<!-- 검색에 따라 테이블을 띄워주는 스크립트 -->
+<script>
+    $(document).ready(function() {
+
+        $('input[name="deleteCheckbox"]').change(function() {
+            triggerSearch();
+        });
+        // 검색 버튼 클릭 이벤트 핸들러를 등록합니다.
+        $('#searchButton').click(function() {
+            triggerSearch();
+        });
+        $('#searchKeyword').keydown(function(event) {
+            if (event.keyCode === 13) { // Enter 키 코드는 13입니다.
+                triggerSearch();
+            }
+        });
+
+        function triggerSearch() {
+            var searchCondition = $('#searchCondition').val();
+            var searchKeyword = $('#searchKeyword').val();
+            var starttime = $('#startTime').val();
+            var endtime = $('#endTime').val();
+            var deleteCondition = $('input[name="deleteCheckbox"]:checked').val();
+
+            if (searchCondition === "regdate" || searchCondition === "deletetime" || searchCondition === "recovertime") {
+                if (!starttime) {
+                    alert("시작날짜를 선택해주세요");
+                    return;
+                }
+            } else if(searchCondition === "replycondition"){
+                console.log(deleteCondition);
+            } else {
+                if (!searchKeyword) {
+                    alert("검색어를 입력하세요");
+                    return;
+                }
+            }
+
+            filterTable(searchCondition, searchKeyword, starttime, endtime, deleteCondition);
+        }
+    });
+
+    function filterTable(searchCondition, searchKeyword, starttime, endtime,deleteCondition) {
+        // AJAX를 사용하여 서버에 검색 요청을 보냅니다.
+        $.ajax({
+            url: '/boardAPI/searchReplies', // 검색을 처리하는 서버 엔드포인트 URL
+            type: 'GET',
+            data: { condition: searchCondition, keyword: searchKeyword, start: starttime, end: endtime, deleteCondition: deleteCondition },
+            success: function (data) {
+                // 검색 결과를 받아옵니다.
+                var searchData = data;
+
+                console.log(data);
+
+                // 기존 테이블을 삭제합니다.
+                $('.table-responsive').empty();
+
+                // 새로운 테이블을 만듭니다.
+                var newTable = $('<table data-order=\'\[\[1, "desc"\]\]\' class="table table-bordered">').attr('id', 'dataTable').attr('width', '100%').attr('cellspacing', '0');
+                var thead = $('<thead>').appendTo(newTable);
+                var tbody = $('<tbody>').appendTo(newTable);
+
+                // 테이블 헤더 생성
+                var headerRow = $('<tr>').appendTo(thead);
+                $('<th>').text('checkbox').appendTo(headerRow);
+                $('<th>').text('번호').appendTo(headerRow);
+                $('<th>').text('작성자').appendTo(headerRow);
+                $('<th>').text('내용').appendTo(headerRow);
+                $('<th>').text('작성일').appendTo(headerRow);
+                $('<th>').text('삭제여부').appendTo(headerRow);
+                $('<th>').text('삭제일시').appendTo(headerRow);
+                $('<th>').text('복원일시').appendTo(headerRow);
+
+
+                // 데이터 출력
+                searchData.forEach(function (reply) {
+                    var newRow = $('<tr>').appendTo(tbody);
+                    $('<td><input class="userCheckbox" type="checkbox"/>').appendTo(newRow);
+                    $('<td>').text(reply.id).appendTo(newRow);
+                    $('<td>').text(reply.nickname).appendTo(newRow);
+                    $('<td>').text(reply.content).appendTo(newRow);
+
+                    $('<td>').text(formatDate(new Date(reply.regdate))).appendTo(newRow);
+                    $('<td>').text(reply.reply_condition).appendTo(newRow);
+
+
+                    if(reply.delete_time ==null){
+                        $('<td>').text("").appendTo(newRow);
+                    }else{
+                        $('<td>').text(formatDate(new Date(reply.delete_time))).appendTo(newRow);
+                    }
+                    if(reply.recover_time ==null){
+                        $('<td>').text("").appendTo(newRow);
+                    }else{
+                        $('<td>').text(formatDate(new Date(reply.recover_time))).appendTo(newRow);
+                    }
+
+                });
+
+                tableResponsive = $('<div>').appendTo($('.table-responsive'));
+
+                // 테이블 생성한 것을 tableResponsive 안에 넣어준다
+                tableResponsive.append(newTable);
+
+                // 새로 생성된 테이블에 DataTables 초기화
+                newTable.DataTable({
+                    "dom": "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                        "<'row'<'col-sm-12'tr>>" +
+                        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                    "renderer": 'bootstrap',
+                    "language": {
+                        "paginate": {
+                            "previous": "previous",
+                            "next": "next"
+                        }
+                    }
+                });
+            },
+            error: function (xhr, status, error) {
+                // 에러 처리
+                console.error(xhr);
+            }
+        });
+    }
+
+    // 날짜 포맷팅 함수
+    function formatDate(date) {
+        if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+            return ''; // date가 null이거나 유효한 날짜가 아니면 빈 문자열 반환
+        }
+
+        var year = date.getFullYear();
+        var month = ('0' + (date.getMonth() + 1)).slice(-2); // 월은 0부터 시작하므로 +1
+        var day = ('0' + date.getDate()).slice(-2);
+        var hours = ('0' + date.getHours()).slice(-2);
+        var minutes = ('0' + date.getMinutes()).slice(-2);
+        var seconds = ('0' + date.getSeconds()).slice(-2);
+
+        return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
+    }
+</script>
+
+<script>
+
+    //체크 댓글 삭제
+    function deleteCheckedReplies(){
+        // var token = $("meta[name='_csrf']").attr("content");
+        // var header = $("meta[name='_csrf_header']").attr("content");
+        const checkboxes = document.querySelectorAll('.replyCheckbox:checked');
+        if (checkboxes.length === 0) {
+            alert("삭제할 댓글을 선택해주세요.");
+            return;
+        }
+        let checked = true;
+        var rno_arr = [];
+        var url = "/replies/deleteReplies";
+
+        console.log(checkboxes);
+
+
+
+        checkboxes.forEach(checkbox => {
+            var boardRow = $(this).closest('tr');
+            const replyCondition = checkbox.closest('tr').querySelector('td:nth-child(6)').innerText;
+            if (replyCondition !== "N"){
+                alert("선택한 댓글중 이미 삭제된 댓글이 있습니다.");
+                checked = false;
+            }
+        });
+
+        if (checked){
+            checkboxes.forEach(checkbox => {
+                const checkedId = checkbox.closest('tr').querySelector('td:nth-child(2)').innerText;
+                rno_arr.push(checkedId);
+
+                console.log(rno_arr);
+
+                // 선택된 댓글이 없는 경우 알림
+                if (rno_arr.length === 0) {
+                    alert("삭제할 댓글을 선택해주세요.");
+                    return;
+                }
+
+                $.ajax({
+                    url: url,
+                    type: "POST",
+                    data: JSON.stringify(rno_arr),
+                    contentType: "application/json; charset-utf-8",
+                    // beforeSend : function (xhr){
+                    //     xhr.setRequestHeader(header, token);
+                    // },
+                    cache : false,
+                    success : function (){
+                        console.log("삭제 처리 되었습니다.");
+                    },
+                    error : function (request, error){
+                        if (request.status == '401'){
+                            alert("권한이 없습니다.");
+                            location.href='/users/login';
+                        }else {
+                            alert("삭제처리 오류");
+                            alert("code: " + request.status + "\n message : " + request.responseText + "\n error : " + error);
+                        }
+                    }
+                });
+            })
+            alert("삭제 처리 되었습니다.");
+            window.location.reload();
+        }
+    }
+
+    //체크 댓글 복구
+    function restoreCheckedReplies(){
+        // var token = $("meta[name='_csrf']").attr("content");
+        // var header = $("meta[name='_csrf_header']").attr("content");
+        const checkboxes = document.querySelectorAll('.replyCheckbox:checked');
+        if (checkboxes.length === 0) {
+            alert("복원할 댓글을 선택해주세요.");
+            return;
+        }
+        let checked = true;
+        var rno_arr = [];
+        var url = "/replies/restoreReplies";
+
+        console.log(checkboxes);
+
+
+
+        checkboxes.forEach(checkbox => {
+            const replyCondition = checkbox.closest('tr').querySelector('td:nth-child(6)').innerText;
+            console.log("restore: " + replyCondition);
+            if (replyCondition !== "Y"){
+                alert("선택한 댓글중 삭제되지 않은 댓글이 있습니다.");
+                checked = false;
+            }
+        });
+
+        if (checked){
+            checkboxes.forEach(checkbox => {
+
+                const checkedId = checkbox.closest('tr').querySelector('td:nth-child(2)').innerText;
+                rno_arr.push(checkedId);
+
+                console.log(rno_arr);
+
+                $.ajax({
+                    url: url,
+                    type: "POST",
+                    data: JSON.stringify(rno_arr),
+                    contentType: "application/json; charset-utf-8",
+                    // beforeSend : function (xhr){
+                    //     xhr.setRequestHeader(header, token);
+                    // },
+                    cache : false,
+                    success : function (){
+                        console.log("복구 처리 되었습니다.");
+                    },
+                    error : function (request, error){
+                        if (request.status == '401'){
+                            alert("권한이 없습니다.");
+                            location.href='/users/login';
+                        }else {
+                            alert("복구처리 오류");
+                            alert("code: " + request.status + "\n message : " + request.responseText + "\n error : " + error);
+                        }
+                    }
+                });
+            })
+            alert("복구 처리 되었습니다.");
+            window.location.reload();
+        }
+    }
+</script>
+</body>
+
+</html>

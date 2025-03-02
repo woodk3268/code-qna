@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>new board</title>
+
+    <!-- 드롭존 css -->
+    <link href="https://unpkg.com/dropzone@6.0.0-beta.1/dist/dropzone.css" rel="stylesheet" type="text/css" />
+
+    <!-- SB Admin2 text/css -->
+    <link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link
+            href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+            rel="stylesheet">
+
+    <!-- SB Admin2 css -->
+    <link href="/css/sb-admin-2.min.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+<div id="wrapper">
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
+
+            <!-- 헤더 영역 -->
+            <div th:include="~{fragments/header :: #header}"></div>
+
+            <!-- Nested Row within Card Body -->
+            <div class="content-fluid row p-5">
+                <div class="col-lg-12">
+                    <div class="form-group row">
+                        <input id="nickname" type="hidden" th:value="${nickname}">
+
+                        <!-- 맨 위 타이틀부분 -->
+                        <div class="col-sm-9">
+                            <h1 class="h4 text-gray-900 mb-4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;게시글 등록</h1>
+                        </div>
+
+                        <!-- 취소버튼 -->
+                        <div class="col-sm-3 text-right">
+                            <a href="main" class="btn btn-danger btn-icon-split" id="cancel-button">
+                                <span class="text">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;취소 버튼&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- form 시작 부분 -->
+                    <form class="user" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <input type="text" class="form-control form-control-user" id="title"
+                                   placeholder="제목을 입력하세요">
+                        </div>
+
+                        <!-- 토스트 ui -->
+                        <div id="tui"></div>
+                        <hr>
+
+                        <!-- 해시태그 추가버튼 -->
+                        <div class="form-group row">
+                            <div class="col-sm-6 mb-3 mb-sm-0">
+                                <input type="text" class="form-control form-control-user" id="hashtag"
+                                       placeholder="input hashtag">
+                            </div>
+                            <div class="col-sm-3">
+                                <button class="btn btn-primary" type="button" id="newhashtag">
+                                    추가
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 해시태그 -->
+                        <div class="form-group row hashtag-list">
+                            <!-- 해시태그 추가되는 부분 -->
+                        </div>
+
+                        <!-- 드롭존 첨부파일 -->
+                        <div class="dropzone" id="myDropzone">
+                        </div>
+
+                        <br/><br/>
+                        <!-- 등록 버튼 -->
+                        <div class="form-group row">
+                            <div class="col-2"></div>
+                            <div class="col-8">
+                                <a href="#" class="btn btn-primary btn-user btn-block" id="create-btn">
+                                    게시물 등록하기 버튼
+                                </a>
+                            </div>
+                            <div class="col-2"></div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 푸터 영역 -->
+            <div th:include="~{fragments/footer :: #footer}"></div>
+
+        </div>
+    </div>
+</div>
+
+<!-- 드롭존 스크립트 -->
+<script src="https://unpkg.com/dropzone@6.0.0-beta.1/dist/dropzone-min.js"></script>
+
+<!-- Bootstrap core JavaScript-->
+<script src="/vendor/jquery/jquery.min.js"></script>
+<script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Core plugin JavaScript-->
+<script src="/vendor/jquery-easing/jquery.easing.min.js"></script>
+
+<!-- SB Admin2 스크립트 -->
+<script src="/js/sb-admin-2.min.js"></script>
+
+<!-- TUI 에디터 JS CDN -->
+<script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+<!-- TUI 에디터 CSS CDN -->
+<link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
+
+<!-- TUI 스크립트 -->
+<script>
+    const editor = new toastui.Editor({
+        el: document.querySelector('#tui'),          // 에디터를 적용할 요소 (컨테이너)
+        height: '500px',                             // 에디터 영역의 높이 값 (OOOpx || auto)
+        initialEditType: 'wysiwyg',                 // 최초로 보여줄 에디터 타입 (markdown || wysiwyg)
+        initialValue: '',                            // 내용의 초기 값으로, 반드시 마크다운 문자열 형태여야 함
+        previewStyle: 'vertical',                    // 마크다운 프리뷰 스타일 (tab || vertical)
+        placeholder: '내용을 입력해 주세요.',
+
+    });
+
+    /*editor.setHTML(document.getElementById('article-content').value);*/
+</script>
+
+<!-- 해시태그 추가 스크립트 -->
+<script>
+    $(document).ready(function(){
+
+        // 해시태그 추가 버튼 클릭 시
+        $('#newhashtag').click(function(){
+            addHashtag();
+        });
+
+        // 해시태그 입력 필드에서 엔터 키 눌렀을 때
+        $('#hashtag').keypress(function(event){
+            // 엔터 키의 keyCode는 13입니다.
+            if(event.which === 13) {
+                addHashtag();
+            }
+        });
+
+        // 해시태그 추가 함수
+        function addHashtag(){
+            // 입력한 해시태그 텍스트 가져오기
+            var hashtagText = $('#hashtag').val().trim();
+            // 정규표현식을 사용하여 유효성 검사
+            var hashtagPattern = /^[a-zA-Z0-9가-힣]{1,9}$/;
+            // 입력한 해시태그가 비어있으면 추가하지 않음
+            if(hashtagText !== '' && hashtagPattern.test(hashtagText)) {
+                // 현재 해시태그 목록 개수 확인
+                var hashtagCount = $('.form-group.hashtag-list .hashtag').length;
+                // 해시태그가 3개 미만인 경우에만 추가
+                if(hashtagCount < 3){
+                    // 해시태그 추가 요소 생성
+                    var hashtagElement = '<div class="p-2 hashtag_delete">' +
+                        '<a class="btn btn-primary btn-icon-split">' +
+                        '<span class="text hashtag">#' + hashtagText + '</span>' +
+                        '<span class="icon text-white-50">' +
+                        '<i class="fas fa-trash"></i>' +
+                        '</span>' +
+                        '</a>' +
+                        '</div>';
+                    // 생성한 요소를 해시태그 목록에 추가
+                    $('.form-group.hashtag-list').append(hashtagElement);
+                    // 입력 필드 비우기
+                    $('#hashtag').val('');
+                } else {
+                    // 해시태그 개수가 최대 개수를 초과한 경우 경고 메시지 표시
+                    alert('최대 3개까지만 추가할 수 있습니다.');
+                }
+            } else {
+                // 유효성 검사 실패 시 경고 메시지 표시
+                alert('한글이나 영어 10글자 이내로 입력해주세요');
+            }
+        }
+
+        // 삭제 버튼 클릭 시
+        $(document).on('click', '.btn-icon-split', function(){
+            // 해당 해시태그 요소 제거
+            $(this).closest('.hashtag_delete').remove();
+        });
+    });
+</script>
+
+<!-- 드롭존 스크립트 -->
+<script>
+    //Dropzone.autoDiscover = false; // deprecated 된 옵션. false로 해놓는걸 공식문서에서 명시
+    document.addEventListener("DOMContentLoaded", async function() {
+        let uploadedFiles = []; // 업로드된 파일 정보를 저장할 배열
+        //let deletedFiles = []; // 삭제된 파일 정보를 저장할 배열
+
+        try {
+            const response = await fetch('/fileAPI/fileconfig');
+            const config = await response.json();
+
+            const maxFiles = config.max_File_Num;
+            const maxFilesize = config.max_file_Size;
+            const acceptedFiles = config.file_ext.split(',').map(ext => '.' + ext).join(',');
+            console.log(maxFiles);
+            console.log(maxFilesize);
+            console.log(acceptedFiles);
+
+            const myDropzone = new Dropzone("#myDropzone", {
+                url: "/fileAPI/upload",
+                addRemoveLinks: true, // 업로드 후 파일 삭제버튼 표시 여부
+                dictRemoveFile: '삭제', // 삭제버튼 표시 텍스트
+                maxFiles: maxFiles, // 업로드 파일수
+                maxFilesize: maxFilesize, // 최대업로드용량
+                acceptedFiles: acceptedFiles, // 이미지 파일 포맷만 허용
+                parallelUploads: maxFiles, //동시에 업로드할 수 있는 파일 업로드 수
+                autoProcessQueue: false,
+                success: function(file, response) {
+                    //dropzone의 동작 : 파일이 여러 개일 시 url로 1개씩 보냄
+                    console.log(response);
+                    uploadedFiles.push(response);
+                    console.log(uploadedFiles);
+
+                    // Check if all files have been uploaded
+                    if (myDropzone.getQueuedFiles().length === 0 && myDropzone.getUploadingFiles().length === 0) {
+                        createboard(); // All files uploaded, submit the form
+                    }
+                },
+                error: function(file, errorMessage) {
+                    console.error(errorMessage);
+                },
+                removedfile: function(file) {
+                    const index = uploadedFiles.findIndex(f => f.name === file.name);
+                    if (index !== -1) {
+                        deletedFiles.push(uploadedFiles[index]);
+                        uploadedFiles.splice(index, 1);
+                    }
+                    if (file.previewElement != null) {
+                        file.previewElement.parentNode.removeChild(file.previewElement);
+                    }
+                }
+            });
+
+            // 최대 파일 수 초과 메서드
+            myDropzone.on("maxfilesexceeded", function(file) {
+                this.removeFile(file); // 초과한 파일 제거
+                alert("업로드 가능한 최대 파일 수: " + maxFiles + "개"); // 사용자에게 알림
+            });
+
+            // 최대용량 초과, 허용되지 않는 허용자 메서드
+            myDropzone.on("addedfile", function(file) {
+                if (!acceptedFiles.includes(file.name.substring(file.name.lastIndexOf('.')).toLowerCase())) {
+                    this.removeFile(file); // 허용되지 않은 확장자를 가진 파일 제거
+                    alert("허용되지 않은 파일 형식입니다."); // 사용자에게 알림
+                } else if (file.size > maxFilesize * 1024 * 1024) {
+                    this.removeFile(file); // 설정된 용량을 초과하는 파일 제거
+                    alert("업로드 가능한 파일 최대용량: " + maxFilesize + "MB"); // 사용자에게 알림
+                }
+            });
+
+            const createButton = document.getElementById("create-btn");
+
+            if (createButton) {
+                // 클릭 이벤트가 감지되면 생성 API 요청
+                createButton.addEventListener("click", async (event) => {
+                    event.preventDefault();
+
+                    //원래는 여기서 개인정보 검사를 진행해야함
+
+                    if (myDropzone.getQueuedFiles().length > 0) {
+                        myDropzone.processQueue(); // Process the queue and upload files
+                    } else {
+                        createboard(); // No files to upload, submit the form directly
+                    }
+                });
+            }
+
+        } catch (error) {
+            console.error('Failed to fetch file config:', error);
+        }
+
+        async function createboard() {
+            try {
+                let content = editor.getHTML();
+
+                // 주민등록번호 포함 여부 확인 변수
+                let containsSSN = false;
+
+                // 정규표현식을 사용하여 주민등록번호를 찾아 마스킹 처리
+                content = content.replace(/\b(\d{6})(\d{7})\b/g, function(_, p1, p2) {
+                    containsSSN = true;
+                    return p1 + '*******';
+                });
+                content = content.replace(/\b(\d{6})[- ]?(\d{7})\b/g, function(_, p1, p2) {
+                    containsSSN = true;
+                    return p1 + (p2 ? '-*******' : '*******');
+                });
+
+                // 주민등록번호가 포함된 경우 사용자에게 경고창을 띄움
+                if (containsSSN) {
+                    if (!confirm("주민등록번호가 포함되어 있을 가능성이 있습니다. 게시글을 등록하시겠습니까?")) {
+                        return; // 사용자가 취소를 누르면 함수 종료
+                    }
+                }
+
+                console.log(document.getElementById("nickname").value);
+                // 해시태그들을 담을 문자열 변수
+                let hashtags = "";
+                // 해시태그 목록 요소들을 선택
+                const hashtagElements = document.querySelectorAll('.hashtag-list .btn-primary');
+                // 각 해시태그 목록 요소들을 순회하며 해시태그들을 문자열에 추가
+                hashtagElements.forEach((element, index) => {
+                    const hashtagText = element.querySelector('.text').innerText; // 해시태그 텍스트 가져오기
+
+                    hashtags += hashtagText; // 해시태그 추가
+                });
+
+                // 제목, 내용 입력 여부 확인
+                if (document.getElementById("title").value.trim() === '') {
+                    alert('제목을 입력하세요.');
+                    return;
+                }else if(content === '<p><br></p>'){
+                    alert('내용을 입력하세요.');
+                    return;
+                }
+
+                fetch("/boardAPI/register", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        title: document.getElementById("title").value, // 제목 데이터 model에 추가
+                        nickname: document.getElementById("nickname").value,
+                        content: content, // 본문 내용 추가
+                        hashtag: hashtags,
+                        heart: 0,
+                        hitcount: 0,
+                        board_condition: "N",
+                        files: uploadedFiles,
+                    }),
+                })
+                    .then(() => {
+                        alert("등록 완료되었습니다.");
+                        location.replace("/main");
+                    })
+                    .catch(() => {
+                        alert("등록 실패했습니다.");
+                    });
+            } catch (error) {
+                console.error('Failed to create post:', error);
+                alert("게시물 등록에 실패했습니다.");
+            }
+        }
+    });
+</script>
+
+
+</body>
+</html>
